@@ -10,7 +10,7 @@ export class RestApp {
 
     private app: express.Application = express();;
 
-    constructor(private port: number, private controllers: RestController[], apiRoute: string = '/api/v1') {
+    constructor(private port: number, controllers: RestController[], apiRoute: string = '/api/v1') {
         
         this.app.use(bodyParser())
         this.app.use(apiRoute + '/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));

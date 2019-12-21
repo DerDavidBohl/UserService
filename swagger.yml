@@ -1,89 +1,175 @@
-host: localhost:3000
-basePath: /api/v1
+basePath: /api/v1      
+host: 'localhost:3000'
 swagger: '2.0'
+schemes:
+  - http
+  - https
 info:
   version: 1.0.0
-  title: title
-  description: description
+  title: User Service
+  description: Managing Users and Authentication
   termsOfService: terms
   contact:
     name: David Bohl
-    url: https://github.com/DerDavidBohl/nodejs-rest-starter
+    url: https://github.com/DerDavidBohl/UserService
+    email: david@bohl24.de
   license:
     name: MIT
     url: http://opensource.org/licenses/MIT
 paths:
-  /hello:
-    get:
-      summary: Gets All Worlds
-      description: Gets All Worlds!
+  /auth:
+    post:
+      description: Authenticates a User
+      parameters:
+        - $ref: '#/parameters/loginInBody'
       responses:
-        200:
+        '200':
+          description: OK
+          headers:
+            authorization:
+              type: string
+  /users:
+    get:
+      description: Gets all Users
+      parameters:
+        - $ref: '#/parameters/roleInQuery'
+      responses:
+        '200':
+          description: OK - With User
+    post:
+      description: Creates a new User
+      parameters:
+        - $ref: '#/parameters/userInBody'
+      responses:
+        '201':
+          description: Created
+
+  /users/{userId}:
+    parameters:
+      - $ref: '#/parameters/userIdInPath'
+    get:
+      description: Gets a specific User
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+    put:
+      description: Updates a User
+      parameters:
+        - $ref: '#/parameters/userInBody'
+      responses:
+        '204':
+          description: OK
+    delete:
+      description: Deletes a User
+      responses:
+        '204':
+          description: Deleted
+  /users/{userId}/roles:
+    parameters:
+      - $ref: '#/parameters/userIdInPath'
+    get:
+      description: Gets a specific Users Roles
+      responses:
+        '200':
+          description: OK
           schema:
             type: array
-            items:
-              $ref: '#/definitions/World'
-          description: OK
+            items: 
+              type: string
     post:
-      summary: Creates a new World
-      responses:
-        201:
-          description: Created
+      description: Adds a Role to a User
       parameters:
-        - $ref: '#/parameters/World'
-  /hello/{WorldId}:
-    get:
-      summary: Gets a specific World
-      description: Gets a specific World
-      parameters:
-        - $ref: '#/parameters/WorldId'
+        - $ref: '#/parameters/rolesInBody'
       responses:
-        200:
-          schema:
-            $ref: '#/definitions/World'
-          description: Requested World
-        404:
-          description: World not found.
-
-    put:
-      description: Updates a World
-      responses:
-        200:
-          description: OK
-        404:
-          description: World not found.
-        400:
-          description: Body does not Match World Format
-      parameters:
-        - $ref: '#/parameters/World'
-        - $ref: '#/parameters/WorldId'
+        '201':
+          description: OK - Role added         
+  /users/{userId}/roles/{role}:
+    parameters:
+      - $ref: '#/parameters/userIdInPath'
+      - $ref: '#/parameters/roleInPath'
     delete:
-      description: Deletes a World
-      parameters:
-        - $ref: '#/parameters/WorldId'
+      description: Removes a Role from a User
       responses:
-        204:
-          description: Successful deleted
+        '204':
+          description: OK
+  /users/{userId}/verify:
+    post:
+      description: Verifies a User
+      responses:
+        '200':
+          description: OK
+
 parameters:
-  WorldId:
-    name: WorldId
+  userIdInPath:
+    name: userId
     in: path
     required: true
     type: string
-    description: Id of a specific World
-  World:
-    name: World
+    description: Id of an User
+  roleInPath:
+    name: role
+    in: path
+    required: true
+    type: string
+    description: Id of an User
+  roleInQuery:
+    name: role
+    in: query
+    type: string
+    description: Role Filter
+  rolesInBody:
+    name: rolesInBody
     in: body
-    description: World
+    description: Role in Body
     schema:
-      $ref: '#/definitions/World'
+      $ref: '#/definitions/Roles'
+  userInBody:
+    name: userInBody
+    in: body
+    description: User Object in Body
+    schema:
+      $ref: '#/definitions/User'
+  loginInBody:
+    name: loginInBody
+    in: body
+    description: Login in Body
+    schema:
+      $ref: '#/definitions/Login'
+  verifyTokenInQuery:
+    name: verifyTokenInQuery^
+    in: query
+    type: string
 definitions:
-  World:
+  User:
     type: object
     properties:
       name:
         type: string
-      size:
-        type: integer
-    
-    
+      email:
+        type: string
+      password:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+  Roles:
+    type: array
+    items:
+      type: string
+  Login:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: authorization
+    in: header
+security:
+  - Bearer: []

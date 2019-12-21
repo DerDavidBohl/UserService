@@ -1,17 +1,18 @@
 {
-  "name": "nodejs-rest-starter",
+  "name": "user-service",
   "version": "1.0.0",
   "description": "A Starter for node.js REST Apps.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc",
     "watch": "tsc --watch",
-    "start": "nodemon ./build/server.js"
+    "start": "tsc && node build/server.js",
+    "dev": "nodemon -L -e ts --exec \"npm run start\"",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DerDavidBohl/nodejs-rest-starter.git"
+    "url": "git+https://github.com/DerDavidBohl/UserService.git"
   },
   "keywords": [
     "nodejs",
@@ -23,9 +24,9 @@
   "author": "David Bohl",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DerDavidBohl/nodejs-rest-starter/issues"
+    "url": "https://github.com/DerDavidBohl/UserService/issues"
   },
-  "homepage": "https://github.com/DerDavidBohl/nodejs-rest-starter#readme",
+  "homepage": "https://github.com/DerDavidBohl/UserService#readme",
   "dependencies": {
     "express": "^4.17.1",
     "swagger-ui-express": "^4.0.7",

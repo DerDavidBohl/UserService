@@ -1,7 +1,7 @@
 import { RestApp } from "./utils/rest-app";
-import { HelloWorldController } from "./controllers/hello-world.controller";
+import { UserController } from "./controllers/user.controller";
 
 const app = new RestApp(3000, [
-    new HelloWorldController()
+    new UserController()
 ]);
 app.start();

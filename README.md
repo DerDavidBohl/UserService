@@ -1,2 +1,2 @@
-# nodejs-rest-starter
+# UserService
 A Starter for node.js REST-apps
