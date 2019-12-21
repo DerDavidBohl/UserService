@@ -1,0 +1,89 @@
+host: localhost:3000
+basePath: /api/v1
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: title
+  description: description
+  termsOfService: terms
+  contact:
+    name: David Bohl
+    url: https://github.com/DerDavidBohl/nodejs-rest-starter
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+paths:
+  /hello:
+    get:
+      summary: Gets All Worlds
+      description: Gets All Worlds!
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/World'
+          description: OK
+    post:
+      summary: Creates a new World
+      responses:
+        201:
+          description: Created
+      parameters:
+        - $ref: '#/parameters/World'
+  /hello/{WorldId}:
+    get:
+      summary: Gets a specific World
+      description: Gets a specific World
+      parameters:
+        - $ref: '#/parameters/WorldId'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/World'
+          description: Requested World
+        404:
+          description: World not found.
+
+    put:
+      description: Updates a World
+      responses:
+        200:
+          description: OK
+        404:
+          description: World not found.
+        400:
+          description: Body does not Match World Format
+      parameters:
+        - $ref: '#/parameters/World'
+        - $ref: '#/parameters/WorldId'
+    delete:
+      description: Deletes a World
+      parameters:
+        - $ref: '#/parameters/WorldId'
+      responses:
+        204:
+          description: Successful deleted
+parameters:
+  WorldId:
+    name: WorldId
+    in: path
+    required: true
+    type: string
+    description: Id of a specific World
+  World:
+    name: World
+    in: body
+    description: World
+    schema:
+      $ref: '#/definitions/World'
+definitions:
+  World:
+    type: object
+    properties:
+      name:
+        type: string
+      size:
+        type: integer
+    
+    
