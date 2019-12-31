@@ -1,4 +1,4 @@
-basePath: /api/v1      
+basePath: /api/v1 
 host: 'localhost:3000'
 swagger: '2.0'
 schemes:
@@ -28,6 +28,25 @@ paths:
           headers:
             authorization:
               type: string
+
+  /reset:
+    post:
+      description: Resets a password for a email
+      parameters:
+        - $ref: '#/parameters/emailInQuery'
+        - $ref: '#/parameters/resetTokenInQuery'
+        - $ref: '#/parameters/newPasswordInBody'
+      responses:
+        '204':
+          description: OK
+  /reset/request:
+    post:
+      description: Requests a password reset for a email
+      parameters:
+        - $ref: '#/parameters/emailInBody'
+      responses:
+        '204':
+          description: OK
   /users:
     get:
       description: Gets all Users
@@ -94,14 +113,41 @@ paths:
       responses:
         '204':
           description: OK
-  /users/{userId}/verify:
+  /users/verify:
     post:
+      parameters:
+        - $ref: '#/parameters/emailInQuery'
+        - $ref: '#/parameters/verifyTokenInQuery'
       description: Verifies a User
       responses:
         '200':
           description: OK
-
 parameters:
+  resetTokenInQuery:
+    name: token
+    in: query
+    type: string
+    description: reset token in Query
+    required: true
+  emailInQuery:
+    name: email
+    in: query
+    type: string
+    description: email address in Query
+    required: true
+  newPasswordInBody:
+    name: newPasswordInBody
+    in: body
+    required: true
+    description: new password in body
+    schema:
+      $ref: '#/definitions/NewPassword'
+  emailInBody:
+    name: emailInBody
+    in: body
+    description: email-address in body
+    schema:
+      $ref: '#/definitions/Email'
   userIdInPath:
     name: userId
     in: path
@@ -138,7 +184,8 @@ parameters:
     schema:
       $ref: '#/definitions/Login'
   verifyTokenInQuery:
-    name: verifyTokenInQuery^
+    name: token
+    required: true
     in: query
     type: string
 definitions:
@@ -155,6 +202,11 @@ definitions:
         type: array
         items:
           type: string
+  Email:
+    type: object
+    properties:
+      email:
+        type: string
   Roles:
     type: array
     items:
@@ -164,6 +216,11 @@ definitions:
     properties:
       email:
         type: string
+      password:
+        type: string
+  NewPassword:
+    type: object
+    properties:
       password:
         type: string
 securityDefinitions:

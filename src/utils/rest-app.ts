@@ -1,8 +1,8 @@
 import { RestController } from "../interfaces/rest-controller.interface";
-import express = require("express");
+import express from "express";
 import YAML = require("yamljs");
 import swaggerUI from 'swagger-ui-express';
-import bodyParser = require("body-parser");
+import {Request, Response} from "express";
 
 const swaggerDocument = YAML.load("swagger.yml");
 
@@ -12,7 +12,9 @@ export class RestApp {
 
     constructor(private port: number, controllers: RestController[], apiRoute: string = '/api/v1') {
         
-        this.app.use(bodyParser())
+        // this.app.use(bodyParser());
+        
+        this.app.use(express.json());
         this.app.use(apiRoute + '/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
         controllers.forEach(controller => {
@@ -22,6 +24,11 @@ export class RestApp {
             }
 
             this.app.use(apiRoute + controller.path, controller.initializeRoutes());
+        });
+
+        this.app.use((err: Error, req: Request, res: Response, next: any) => {
+            console.error(err);
+            res.status(500).send('Something went wrong!!');
         });
     }
 
