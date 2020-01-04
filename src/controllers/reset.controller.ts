@@ -1,7 +1,7 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
-import { check, validationResult, body, query } from "express-validator";
-import { User, IUser } from "../models/user.model";
+import { body, query } from "express-validator";
+import { User } from "../models/user.model";
 import { randomBytes } from "crypto";
 import { mailer, fromEmail } from "../utils/send-mail";
 import { passwordRegEx } from "../utils/password-regex";
@@ -23,21 +23,16 @@ export class ResetController implements RestController {
 
     resetPassword(req: Request, res: Response) {
 
-        console.log('Running method');
-
-
         if (!validate(req, res)) {
             return;
         }
 
-        console.log('Valid');
-
         User.findOne({ email: req.query.email }, (err, user) => {
-            
+
             if (err || !user) {
                 return res.status(404).send({ message: 'User not found' });
             }
-            
+
             if (user.passwordResetToken !== req.query.token) {
                 return res.status(400).send({ message: 'Wrong Token' });
             }
@@ -50,17 +45,18 @@ export class ResetController implements RestController {
                 return res.status(400).send({ message: 'Wrong Token' });
             }
 
-            User.updateOne({ _id: user._id }, { $unset: { passwordResetToken: 1, passwordResetTokenRequestDate: 1 }, password: hashSync(req.body.password, 10) }, (err, raw) => {
-                if (err)
-                    return res.sendStatus(500);
+            User.updateOne({ _id: user._id },
+                { $unset: { passwordResetToken: 1, passwordResetTokenRequestDate: 1 }, password: hashSync(req.body.password, 10), passwordLastModified: Date.now() },
+                (err) => {
+                    if (err)
+                        return res.sendStatus(500);
 
-                res.status(204).send({ message: 'Password changed' });
-            });
+                    res.status(204).send({ message: 'Password changed' });
+                });
         });
     }
 
     requestPasswordReset(req: Request, res: Response): any {
-        const errors = validationResult(req);
         if (!validate(req, res)) {
             return;
         }
@@ -90,7 +86,7 @@ This link is valid for 1 day.
 Have a nice day!`,
                     to: user.email,
                     from: fromEmail
-                }, (err, info) => {
+                }, (err) => {
                     if (err) {
                         console.error(err);
                         return;

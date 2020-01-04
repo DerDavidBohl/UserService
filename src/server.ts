@@ -1,14 +1,17 @@
 import { RestApp } from "./utils/rest-app";
 import { UserController } from "./controllers/user.controller";
 import mongoose from "mongoose";
-import { AuthController } from "./controllers/auth.controller";
+import { LoginController } from "./controllers/login.controller";
 import { ResetController } from "./controllers/reset.controller";
+import { User, IUser } from "./models/user.model";
+import { createUser } from "./utils/createUser";
+import { UserServiceRole } from "./utils/roles";
 
 const port = process.env.PORT as unknown as number || 3000;
 
 const app = new RestApp(port, [
     new UserController(),
-    new AuthController(),
+    new LoginController(),
     new ResetController()
 ]);
 
@@ -19,5 +22,25 @@ mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/
             console.error(err);
             return;
         }
-        app.start();
+
+        app.start(() => {
+            //Do initial things here
+
+            User.find((err, users) => {
+                if (err || !users || users.length > 0)
+                    return;
+
+                if (!process.env.INITIAL_USER) {
+                    console.error('Env Var INITIAL_USER is not set please set it in this schema for your initial root user: {"name": "YOURNAME", "email":"YOUREMAIL", "password": "YOURSECRETPASSWORD"}');
+                    return;
+                }
+                const user: IUser = JSON.parse(process.env.INITIAL_USER);
+                user.roles = [UserServiceRole.Root];
+
+                createUser(user, (err, userDoc) => {
+                    console.log('Initial Root User Created');
+                    
+                });
+            });
+        });
     });

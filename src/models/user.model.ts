@@ -33,9 +33,13 @@ const userSchema = new Schema({
     },
     passwordResetToken: String,
     passwordResetTokenRequestDate: Date,
+    passwordLastModified: {
+        type: Date,
+        default: new Date()
+    },
     emailVerificationToken: {
         type: String,
-        default: randomBytes(32).toString('hex')
+        default: function() {return randomBytes(32).toString('hex')}
     }
 });
 
@@ -72,10 +76,14 @@ export interface IUser {
     roles: string[],
     passwordResetToken: string,
     passwordResetTokenRequestDate: Date
+    passwordLastModified: Date
 }
 
-export interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document {}
 
+export interface IUserJsonWebToken {
+    user: UserResponse,
+    passwordLastModified: string
 }
 
 export const User = model<IUserDocument>("User", userSchema);

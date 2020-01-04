@@ -2,11 +2,12 @@ import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
 import { check } from "express-validator";
 import { sign } from "jsonwebtoken";
-import { User, IUser, IUserDocument } from "../models/user.model";
+import { User, IUserDocument, UserResponse, IUserJsonWebToken } from "../models/user.model";
 import { compare, compareSync } from "bcryptjs";
+import { generateDefaultJWT } from "../utils/authenticate";
 
-export class AuthController implements RestController {
-    path: string = '/auth';
+export class LoginController implements RestController {
+    path: string = '/login';
     initializeRoutes(): Router {
         const router = Router();
 
@@ -25,9 +26,7 @@ export class AuthController implements RestController {
                 return res.sendStatus(404);
             }
 
-            const token = sign({ user: <IUser>user },
-                process.env.JWT_SECRET || 'Backup Value please set JWT_SECRET env',
-                { expiresIn: "1 day" });
+            const token = generateDefaultJWT(user);
 
             res.header('authorization', token).status(200).send({ token: token });
         });
