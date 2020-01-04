@@ -36,15 +36,15 @@ export class UserController implements RestController {
         router.post('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), body().isArray(), this.addRoleToSpecificUser);
         router.delete('/:userId/roles/:role', authenticate,
             role(UserServiceRole.Application).needed, param('userId').exists(), param('role').exists(),
-            this.deleteRoleFromSpecificUser)
+            this.deleteRoleFromSpecificUser);
 
         return router;
     }
     deleteSpecificUser(req: Request, res: Response) {
-        if(!validate(req, res)) return;
+        if (!validate(req, res)) return;
 
         User.findByIdAndDelete(req.params.userId, (err, deleted) => {
-            if(err) return res.sendStatus(500);
+            if (err) return res.sendStatus(500);
 
             return res.sendStatus(204);
         })
