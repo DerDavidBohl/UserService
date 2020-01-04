@@ -1,5 +1,4 @@
-basePath: /api/v1 
-host: 'localhost:3000'
+basePath: /api/v1
 swagger: '2.0'
 schemes:
   - http
