@@ -13,6 +13,7 @@ services:
       - mongo 
     volumes: 
       - .:/home/node/app
+    env_file: environment_api.env
   mongo:
     container_name: mongo
     image: mongo
@@ -20,6 +21,4 @@ services:
       - "27017:27017"
     volumes:
       - /userservice/data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=devdb
+    env_file: environment_mongo.env

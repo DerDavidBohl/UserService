@@ -1,4 +1,4 @@
-basePath: /api/v1      
+basePath: /api/v1 
 host: 'localhost:3000'
 swagger: '2.0'
 schemes:
@@ -11,14 +11,15 @@ info:
   termsOfService: terms
   contact:
     name: David Bohl
-    url: https://github.com/DerDavidBohl/UserService
+    url: https://github.com/DerDavidBohl
     email: david@bohl24.de
   license:
     name: MIT
     url: http://opensource.org/licenses/MIT
 paths:
-  /auth:
+  /login:
     post:
+      security: []
       description: Authenticates a User
       parameters:
         - $ref: '#/parameters/loginInBody'
@@ -28,6 +29,26 @@ paths:
           headers:
             authorization:
               type: string
+  /reset:
+    post:
+      security: []
+      description: Resets a password for a email
+      parameters:
+        - $ref: '#/parameters/emailInQuery'
+        - $ref: '#/parameters/resetTokenInQuery'
+        - $ref: '#/parameters/newPasswordInBody'
+      responses:
+        '204':
+          description: OK
+  /reset/request:
+    post:
+      security: []
+      description: Requests a password reset for a email
+      parameters:
+        - $ref: '#/parameters/emailInBody'
+      responses:
+        '204':
+          description: OK
   /users:
     get:
       description: Gets all Users
@@ -43,7 +64,40 @@ paths:
       responses:
         '201':
           description: Created
-
+  /users/verify:
+    post:
+      security: []
+      parameters:
+        - $ref: '#/parameters/emailInQuery'
+        - $ref: '#/parameters/verifyTokenInQuery'
+      description: Verifies a User
+      responses:
+        '200':
+          description: OK
+  /users/current:
+    get:
+      description: gets the current User
+      responses:
+        '200':
+          description: OK
+  /users/current/password:
+    put:
+      description: Sets the password for the current User
+      parameters:
+        - $ref: '#/parameters/newPasswordInBody'
+      responses:
+        '204':
+          description: Password set
+  /users/current/roles:
+    get:
+      description: Gets current Users Roles
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items: 
+              type: string
   /users/{userId}:
     parameters:
       - $ref: '#/parameters/userIdInPath'
@@ -52,20 +106,14 @@ paths:
       responses:
         '200':
           description: OK
-          schema:
-            $ref: '#/definitions/User'
-    put:
-      description: Updates a User
-      parameters:
-        - $ref: '#/parameters/userInBody'
-      responses:
-        '204':
-          description: OK
     delete:
       description: Deletes a User
       responses:
         '204':
           description: Deleted
+  # /users/{userId}/data:
+  #   parameters:
+  #     - $ref: '#/parameters/userIdInPath'
   /users/{userId}/roles:
     parameters:
       - $ref: '#/parameters/userIdInPath'
@@ -94,14 +142,32 @@ paths:
       responses:
         '204':
           description: OK
-  /users/{userId}/verify:
-    post:
-      description: Verifies a User
-      responses:
-        '200':
-          description: OK
-
 parameters:
+  resetTokenInQuery:
+    name: token
+    in: query
+    type: string
+    description: reset token in Query
+    required: true
+  emailInQuery:
+    name: email
+    in: query
+    type: string
+    description: email address in Query
+    required: true
+  newPasswordInBody:
+    name: newPasswordInBody
+    in: body
+    required: true
+    description: new password in body
+    schema:
+      $ref: '#/definitions/NewPassword'
+  emailInBody:
+    name: emailInBody
+    in: body
+    description: email-address in body
+    schema:
+      $ref: '#/definitions/Email'
   userIdInPath:
     name: userId
     in: path
@@ -138,7 +204,8 @@ parameters:
     schema:
       $ref: '#/definitions/Login'
   verifyTokenInQuery:
-    name: verifyTokenInQuery^
+    name: token
+    required: true
     in: query
     type: string
 definitions:
@@ -151,10 +218,11 @@ definitions:
         type: string
       password:
         type: string
-      roles:
-        type: array
-        items:
-          type: string
+  Email:
+    type: object
+    properties:
+      email:
+        type: string
   Roles:
     type: array
     items:
@@ -164,6 +232,11 @@ definitions:
     properties:
       email:
         type: string
+      password:
+        type: string
+  NewPassword:
+    type: object
+    properties:
       password:
         type: string
 securityDefinitions:
