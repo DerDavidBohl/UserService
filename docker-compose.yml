@@ -6,19 +6,19 @@ services:
     build: .
     command: npm run dev
     ports: 
-      - "3000:3000"
+      - "5000:3000"
     links: 
-      - mongo
+      - user-service-mongo
     depends_on: 
-      - mongo 
+      - user-service-mongo 
     volumes: 
       - .:/home/node/app
     env_file: environment_api.env
-  mongo:
-    container_name: mongo
+  user-service-mongo:
+    container_name: user-service-mongo
     image: mongo
     ports:
-      - "27017:27017"
+      - "27117:27017"
     volumes:
       - /userservice/data:/data/db
     env_file: environment_mongo.env

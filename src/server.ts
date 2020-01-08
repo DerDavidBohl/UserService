@@ -13,7 +13,7 @@ const app = new RestApp(port, [
     new UserController(),
     new LoginController(),
     new ResetController()
-]);
+], '/user-service/api/v1', '/swagger');
 
 mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/user-service`,
     { useNewUrlParser: true, user: process.env.MONGO_USER, pass: process.env.MONGO_PASSWORD, authMechanism: 'DEFAULT', authSource: 'admin' }, (err) => {

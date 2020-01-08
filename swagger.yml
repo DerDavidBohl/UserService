@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /user-service/api/v1
 swagger: '2.0'
 schemes:
   - http

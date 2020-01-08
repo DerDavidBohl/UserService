@@ -10,7 +10,7 @@ export class RestApp {
 
     private app: express.Application = express();;
 
-    constructor(private port: number, controllers: RestController[], apiRoute: string = '/api/v1') {
+    constructor(private port: number, controllers: RestController[], apiRoute: string = '/api/v1', defauleSubRoute: string | undefined) {
         
         this.app.use(express.json());
         this.app.use(apiRoute + '/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
@@ -23,6 +23,9 @@ export class RestApp {
 
             this.app.use(apiRoute + controller.path, controller.initializeRoutes());
         });
+
+        if(defauleSubRoute)
+            this.app.use((req, res) => res.redirect(`${apiRoute}${defauleSubRoute}`))
 
         this.app.use((err: Error, req: Request, res: Response, next: any) => {
             console.error(err);
