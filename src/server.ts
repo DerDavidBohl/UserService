@@ -6,13 +6,15 @@ import { ResetController } from "./controllers/reset.controller";
 import { User, IUser } from "./models/user.model";
 import { createUser } from "./utils/createUser";
 import { UserServiceRole } from "./utils/roles";
+import { AuthorizeController } from "./controllers/authorize.controller";
 
 const port = process.env.PORT as unknown as number || 3000;
 
 const app = new RestApp(port, [
     new UserController(),
     new LoginController(),
-    new ResetController()
+    new ResetController(),
+    new AuthorizeController(),
 ], '/user-service/api/v1', '/swagger');
 
 mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/user-service`,

@@ -1,10 +1,9 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
 import { check } from "express-validator";
-import { sign } from "jsonwebtoken";
-import { User, IUserDocument, UserResponse, IUserJsonWebToken } from "../models/user.model";
+import { User, IUserDocument, UserResponse, UserJsonWebTokenPayload } from "../models/user.model";
 import { compare, compareSync } from "bcryptjs";
-import { generateDefaultJWT } from "../utils/authenticate";
+import { generateUserToken } from "../utils/authenticate";
 
 export class LoginController implements RestController {
     path: string = '/login';
@@ -26,7 +25,7 @@ export class LoginController implements RestController {
                 return res.sendStatus(404);
             }
 
-            const token = generateDefaultJWT(user);
+            const token = generateUserToken(user);
 
             res.header('authorization', token).status(200).send({ token: token });
         });

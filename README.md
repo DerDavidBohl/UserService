@@ -1,7 +1,7 @@
 # UserService
 A User and Authentication and Authorization Service
 
-Needed ENVs:
+## Needed ENVs:
 ```
 PORT=YOUR_PORT
 MONGO_HOST=YOUR_MONGO_HOST
@@ -17,4 +17,17 @@ MAIL_DISPLAY_NAME=EMAIL_DISPLAY_NAME
 RESET_TOKEN_PRE_URL=URL_FOR_PASSWORD_RESET_TOKEN (my.frontend.com/reset => my.frontend.com/reset?email=user@mail.com&token=123456789)
 VERIFY_TOKEN_PRE_URL==URL_FOR_PASSWORD_USER_Verification (my.frontend.com/verify => my.frontend.com/verify?email=user@mail.com&token=123456789)
 INITIAL_USER={"name": "Init User Name", "email":"user@mail.com", "password": "SuperSavePassword"}
+```
+
+## Auth:
+```plantuml
+@startuml
+UserBrowser->YourApp: Login Request
+YourApp->UserService: Request Auth Code 
+UserService->UserService: Generate Code/App Mapping
+UserService->UserBrowser: redirect to UserService FrontEnd with code in query
+UserBrowser->UserService: Login Data
+UserService->UserService: Generate JWT with app and User Data
+UserService->UserBrowser: Send JWT
+@enduml
 ```

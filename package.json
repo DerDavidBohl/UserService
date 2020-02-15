@@ -9,7 +9,7 @@
     "start": "tsc && node build/server.js",
     "dev": "nodemon -L -e ts --exec \"npm run start\"",
     "build": "tsc",
-    "docker": "docker-compose down && docker-compose up"
+    "docker": "start http://localhost:5000/user-service && docker-compose down && docker-compose up && docker-compose down"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
   "homepage": "https://github.com/DerDavidBohl/UserService#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-validator": "^6.3.0",
     "jsonwebtoken": "^8.5.1",
@@ -40,13 +41,14 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.6",
     "@types/express": "^4.17.0",
-    "@types/nodemailer": "^6.4.0",
+    "@types/jsonwebtoken": "^8.3.5",
     "@types/mongoose": "^5.5.34",
+    "@types/nodemailer": "^6.4.0",
     "@types/swagger-ui-express": "^3.0.1",
     "@types/yamljs": "^0.2.30",
-    "@types/bcryptjs": "^2.4.2",
-    "@types/jsonwebtoken": "^8.3.5",
     "nodemon": "^1.19.1"
   }
 }

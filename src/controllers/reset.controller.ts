@@ -5,7 +5,7 @@ import { User } from "../models/user.model";
 import { randomBytes } from "crypto";
 import { mailer, fromEmail } from "../utils/send-mail";
 import { passwordRegEx } from "../utils/password-regex";
-import { validate } from "../utils/validate";
+import { validateParameters } from "../utils/validate";
 import { hashSync } from "bcryptjs";
 
 export class ResetController implements RestController {
@@ -23,7 +23,7 @@ export class ResetController implements RestController {
 
     resetPassword(req: Request, res: Response) {
 
-        if (!validate(req, res)) {
+        if (!validateParameters(req, res)) {
             return;
         }
 
@@ -57,7 +57,7 @@ export class ResetController implements RestController {
     }
 
     requestPasswordReset(req: Request, res: Response): any {
-        if (!validate(req, res)) {
+        if (!validateParameters(req, res)) {
             return;
         }
 

@@ -1,13 +1,15 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
-import { User, IUser, UserResponse, IUserDocument } from "../models/user.model";
+import { User, IUser, UserResponse, IUserDocument, TokenType } from "../models/user.model";
 import { check, validationResult, query, param, body } from "express-validator";
 import { hashSync } from "bcryptjs";
 import { passwordRegEx } from "../utils/password-regex";
-import { validate } from "../utils/validate";
+import { validateParameters } from "../utils/validate";
 import { createUser } from "../utils/createUser";
-import { authenticate, generateDefaultJWT } from "../utils/authenticate";
+import { authenticate, generateUserToken } from "../utils/authenticate";
 import { UserServiceRole, role } from "../utils/roles";
+import { deleteRoleFromUser, addRoleToUser, getRolesForUser } from "../utils/user.management";
+import { onlyContext } from "../utils/ContextValidation";
 
 export class UserController implements RestController {
     path: string = '/users';
@@ -26,22 +28,23 @@ export class UserController implements RestController {
         router.post('/verify', [query('email').exists().isEmail(), query('token').exists().notEmpty()], this.verifyUserRegistration);
 
         router.get('/current', authenticate, this.getCurrentUser);
-        router.put('/current/password', authenticate, this.updateCurrentUserPassword);
-        router.get('/current/roles', authenticate, this.getCurrentUserRoles);
+        router.put('/current/password', authenticate, onlyContext(TokenType.User).allowed, body('password').isLength({ min: 8 }).matches(passwordRegEx), this.updateCurrentUserPassword);
+        router.get('/current/roles', authenticate,  this.getCurrentUserRoles);
 
         router.get('/:userId', authenticate, role(UserServiceRole.Read).needed, param('userId').exists(), this.getSpecificUser);
         router.get('/:userId', authenticate, role(UserServiceRole.Write).needed, param('userId').exists(), this.deleteSpecificUser)
 
-        router.get('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), this.getSpecificUserRoles);
-        router.post('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), body().isArray(), this.addRoleToSpecificUser);
+        router.get('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), this.userContextGetSpecificUserRoles);
+        router.post('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), body().isArray(), this.userContextAddRoleToSpecificUser);
         router.delete('/:userId/roles/:role', authenticate,
             role(UserServiceRole.Application).needed, param('userId').exists(), param('role').exists(),
-            this.deleteRoleFromSpecificUser);
+            this.userContextDeleteRoleFromSpecificUser);
 
         return router;
     }
+
     deleteSpecificUser(req: Request, res: Response) {
-        if (!validate(req, res)) return;
+        if (!validateParameters(req, res)) return;
 
         User.findByIdAndDelete(req.params.userId, (err, deleted) => {
             if (err) return res.sendStatus(500);
@@ -50,97 +53,44 @@ export class UserController implements RestController {
         })
     }
 
-    deleteRoleFromSpecificUser(req: Request, res: Response) {
-        if (!validate(req, res)) {
+    userContextDeleteRoleFromSpecificUser(req: Request, res: Response) {
+        if (!validateParameters(req, res)) {
             return;
         }
 
-        const callingUser: IUserDocument = res.locals.user;
-
-        if (!req.params.role.startsWith(`${callingUser.name}-`) && !callingUser.roles.includes(UserServiceRole.Root))
-            return res.status(400).send({ message: `You are only allowed to add/remove roles starting with "${callingUser.name}-".` });
-
-        User.findById(req.params.userId, (err, user) => {
-            if (err || !user)
-                return res.sendStatus(404);
-
-            for (let index = 0; index < user.roles.length; index++) {
-                const element = user.roles[index];
-
-                if (element === req.params.role)
-                    user.roles.splice(index, 1);
-            }
-
-            user.save((err, product) => {
-                return res.sendStatus(204);
-            });
-        });
+        deleteRoleFromUser(res.locals.user, req.params.userId, req.params.role, res);
     }
 
-    addRoleToSpecificUser(req: Request, res: Response) {
-        if (!validate(req, res)) {
+    userContextAddRoleToSpecificUser(req: Request, res: Response) {
+        if (!validateParameters(req, res)) {
             return;
         }
 
-        const roles: string[] = req.body;
-
-
-        if (!res.locals.user.roles.includes(UserServiceRole.Root)) {
-            for (let i = 0; i < roles.length; i++) {
-                const role = roles[i];
-
-                if (!role.startsWith(res.locals.user.name))
-                    return res.status(400).send({ message: 'You are not allowed to post roles with this name' });
-            }
-        }
-
-        User.findById(req.params.userId, (err, user) => {
-            if (err || !user)
-                return res.sendStatus(404);
-
-            roles.forEach(role => {
-                if (!user.roles.includes(role))
-                    user.roles.push(role);
-            });
-
-            user.save((err, result) => {
-                return res.sendStatus(201);
-            });
-        });
+        addRoleToUser(res.locals.user, req.params.userId, req.body, res);
     }
 
-    getSpecificUserRoles(req: Request, res: Response): any {
-        if (!validate(req, res))
+    userContextGetSpecificUserRoles(req: Request, res: Response): any {
+        if (!validateParameters(req, res))
             return;
 
-        const callingUser: IUserDocument = res.locals.user;
-
-        User.findById(req.params.userId, (err, user) => {
-            if (err || !user)
-                return res.sendStatus(404);
-
-            const visibleRoles: string[] = [];
-
-            user.roles.forEach(role => {
-                if (role.startsWith(`${callingUser.name}-`) || callingUser.roles.includes(UserServiceRole.Root))
-                    visibleRoles.push(role);
-            });
-
-            res.send(visibleRoles);
-        });
+        getRolesForUser(res.locals.user, req.params.userId, res);
     }
 
     getCurrentUserRoles(req: Request, res: Response): any {
-        const user: IUserDocument = res.locals.user;
+        let caller: IUserDocument;
 
-        if (!user) {
-            return res.sendStatus(404);
+        if(<TokenType>res.locals.authType === TokenType.Application) {
+            caller = res.locals.application;
+        } else {
+            caller = res.locals.user;
         }
 
-        res.send(user.roles);
+        getRolesForUser(caller, res.locals.user._id, res);
     }
 
     updateCurrentUserPassword(req: Request, res: Response) {
+        if (!validateParameters(req, res, false))
+            return;
         const user: IUserDocument = res.locals.user;
 
         if (!user) {
@@ -155,7 +105,7 @@ export class UserController implements RestController {
                 return res.sendStatus(500)
             }
 
-            return res.header('authorization', generateDefaultJWT(user)).sendStatus(204);
+            return res.header('authorization', generateUserToken(user)).sendStatus(204);
         });
     }
 
@@ -198,7 +148,7 @@ export class UserController implements RestController {
     }
 
     verifyUserRegistration(req: Request, res: Response): any {
-        if (!validate(req, res))
+        if (!validateParameters(req, res))
             return;
 
         User.findOne({ email: req.query.email }, (err, user) => {
@@ -222,7 +172,7 @@ export class UserController implements RestController {
             if (err || !user)
                 return res.sendStatus(404);
 
-            res.status(200).send(<UserResponse>user)
+            res.status(200).send(new UserResponse(user));
         });
     }
 

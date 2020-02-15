@@ -2,6 +2,7 @@ import { Schema, model, Document } from "mongoose";
 import { sign } from "jsonwebtoken";
 import { passwordRegEx } from "../utils/password-regex";
 import { randomBytes } from "crypto";
+import { Token } from "nodemailer/lib/xoauth2";
 
 const userSchema = new Schema({
     name: {
@@ -43,19 +44,17 @@ const userSchema = new Schema({
     }
 });
 
-userSchema.methods.getJwt = function() {
-    return sign({email: this.email}, "123456", {expiresIn: "1 day"});
-}
-
 export class UserResponse {
     id: string;
     name: string;
     email: string;
+    passwordLastModified: string;
 
     constructor(doc: IUserDocument) {
         this.id = doc._id;
         this.name = doc.name;
         this.email = doc.email;
+        this.passwordLastModified = doc.passwordLastModified.toString();
     }
 
     static getMultiple(docs: IUserDocument[]) {
@@ -81,9 +80,28 @@ export interface IUser {
 
 export interface IUserDocument extends IUser, Document {}
 
-export interface IUserJsonWebToken {
-    user: UserResponse,
-    passwordLastModified: string
+export interface IJsonWebToken {
+    user: UserResponse;
+    type: TokenType;
+}
+
+export interface JsonWebToken {
+    payload: any;
+}
+
+export class UserJsonWebTokenPayload implements IJsonWebToken {
+    type = TokenType.User;
+    constructor(public user: UserResponse){}
+}
+
+export class ApplicationJsonWebTokenPayload implements IJsonWebToken {
+    type = TokenType.Application;
+    constructor(public user: UserResponse, public application: UserResponse){};
 }
 
 export const User = model<IUserDocument>("User", userSchema);
+
+export enum TokenType {
+    User,
+    Application
+}
