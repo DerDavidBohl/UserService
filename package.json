@@ -9,7 +9,7 @@
     "start": "tsc && node build/server.js",
     "dev": "nodemon -L -e ts --exec \"npm run start\"",
     "build": "tsc",
-    "docker": "start http://localhost:5000/user-service && docker-compose down && docker-compose up && docker-compose down"
+    "docker": "docker-compose down && docker-compose up"
   },
   "repository": {
     "type": "git",

@@ -18,7 +18,7 @@ export class AuthorizeController implements RestController {
     }
 
     dummyTestRouteCall(req: Request, res: Response) {
-        return res.header('Cache-Control', 'no-cache, no-store, must-revalidate').send({ codeInQuery: req.query.code });
+        return res.header('Cache-Control', 'no-cache, no-store, must-revalidate').send({ queryParams: req.query });
     }
 
     redirectWithCode(req: Request, res: Response): any {
@@ -34,7 +34,7 @@ export class AuthorizeController implements RestController {
             console.log(created);
 
 
-            return res.redirect(`${req.query.redirect}?code=${created[0].code}`, 301);
+            return res.redirect(`${process.env.FRONT_END_LOGIN_URL}?code=${created[0].code}&redirect=${req.query.redirect}`, 301);
         });
     }
 

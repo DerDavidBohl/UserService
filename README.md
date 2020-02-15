@@ -17,6 +17,7 @@ MAIL_DISPLAY_NAME=EMAIL_DISPLAY_NAME
 RESET_TOKEN_PRE_URL=URL_FOR_PASSWORD_RESET_TOKEN (my.frontend.com/reset => my.frontend.com/reset?email=user@mail.com&token=123456789)
 VERIFY_TOKEN_PRE_URL==URL_FOR_PASSWORD_USER_Verification (my.frontend.com/verify => my.frontend.com/verify?email=user@mail.com&token=123456789)
 INITIAL_USER={"name": "Init User Name", "email":"user@mail.com", "password": "SuperSavePassword"}
+FRONT_END_LOGIN_URL=URL_TO_USER_SERVICE_FRONTEND
 ```
 
 ## Auth:
