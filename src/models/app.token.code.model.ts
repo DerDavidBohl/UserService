@@ -1,12 +1,17 @@
 import  { Schema,  Document, Types, model } from "mongoose";
 import { randomBytes } from "crypto";
-import { User, IUser, IUserDocument } from "./user.model";
+import { User, IUserDocument } from "./user.model";
 
-const appTokenCode = new Schema({
+const loginCode = new Schema({
     createdAt: {
         type: Date,
         default: Date.now,
         expires: '1d' // 1 day
+    },
+    user: {
+        type: Types.ObjectId,
+        ref: User,
+        required: true
     },
     application: {
         type: Types.ObjectId,
@@ -20,12 +25,13 @@ const appTokenCode = new Schema({
     }
 });
 
-export interface IAppTokenCode {
+export interface ILoginCode {
     createdAt: Date,
+    user: IUserDocument,
     application: IUserDocument,
     code: string
 }
 
-export interface IAppTokenCodeDokument extends IAppTokenCode, Document {}
+export interface ILoginCodeDokument extends ILoginCode, Document {}
 
-export const AppTokenCode = model<IAppTokenCodeDokument>('AppTokenCode', appTokenCode);
+export const LoginCode = model<ILoginCodeDokument>('LoginCode', loginCode);

@@ -21,14 +21,4 @@ FRONT_END_LOGIN_URL=URL_TO_USER_SERVICE_FRONTEND
 ```
 
 ## Auth:
-```plantuml
-@startuml
-UserBrowser->YourApp: Login Request
-YourApp->UserService: Request Auth Code 
-UserService->UserService: Generate Code/App Mapping
-UserService->UserBrowser: redirect to UserService FrontEnd with code in query
-UserBrowser->UserService: Login Data
-UserService->UserService: Generate JWT with app and User Data
-UserService->UserBrowser: Send JWT
-@enduml
-```
+![](https://www.plantuml.com/plantuml/svg/0/SoWkIImgAStDuN8iACZ9J4uioSpFKz2rKmWjJYqAJYqgoqnETNErGfBqJE52aKDJR1NW7noYu9oVaegi3DD4T1KGWv3iiGfAJSaiIaqkKIZFBCc0c8ZRZLOAxgab2Y7vsQbv2acLMEr7Dbl1iHHe9bWv5vT3QbuAC0G0)

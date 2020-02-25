@@ -1,9 +1,11 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
 import { authenticate, generateApplicationUserToken as generateApplicationUserToken } from "../utils/authenticate";
-import { query } from "express-validator";
+import { query, body } from "express-validator";
 import { validateParameters } from "../utils/validate";
-import { AppTokenCode, IAppTokenCode } from "../models/app.token.code.model";
+import { LoginCode, ILoginCode } from "../models/app.token.code.model";
+import { User } from "../models/user.model";
+import { UserServiceRole } from "../utils/roles";
 
 export class AuthorizeController implements RestController {
     path: string = '/authorize';
@@ -11,7 +13,7 @@ export class AuthorizeController implements RestController {
     initializeRoutes(): import("express").Router {
         const router = Router();
 
-        router.get('/code', authenticate, query('redirect').exists(), this.redirectWithCode);
+        router.post('/code', authenticate, body('application_id').exists(), this.generateCode);
         router.get('/token', authenticate, query('code').exists(), this.getTokenByCode);
         router.get('/dummy', this.dummyTestRouteCall);
         return router;
@@ -21,20 +23,23 @@ export class AuthorizeController implements RestController {
         return res.header('Cache-Control', 'no-cache, no-store, must-revalidate').send({ queryParams: req.query });
     }
 
-    redirectWithCode(req: Request, res: Response): any {
+    generateCode(req: Request, res: Response): any {
         if (!validateParameters(req, res)) return;
 
         const now = new Date();
 
-        AppTokenCode.create([<IAppTokenCode>{ application: res.locals.user }], (err, created) => {
-            if (!created || err || created.length != 1 || created[0].createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
-                return res.status(500).send({ message: 'Code generation failed' });
+        User.findById(req.body.application_id, (err, application) => {
+            if(err || !application || !application.roles.includes(UserServiceRole.Application)) {
+                return res.status(404).send({message: `Could not find Application ID ${req.query.application_id}`});
             }
 
-            console.log(created);
-
-
-            return res.redirect(`${process.env.FRONT_END_LOGIN_URL}?code=${created[0].code}&redirect=${req.query.redirect}`, 301);
+            LoginCode.create([<ILoginCode>{ user: res.locals.user, application: application }], (err, created) => {
+                if (!created || err || created.length != 1 || created[0].createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
+                    return res.status(500).send({ message: 'Code generation failed' });
+                }
+    
+                res.send({code: created[0].code});
+            });
         });
     }
 
@@ -43,21 +48,21 @@ export class AuthorizeController implements RestController {
 
         const now = new Date();
 
-        AppTokenCode.findOne({ code: req.query.code }).populate('application').exec((err, appTokenCode) => {
+        LoginCode.findOne({ code: req.query.code }).populate('user').populate('application').exec((err, loginCode) => {
 
-            if (err || !appTokenCode) {
+            if (err || !loginCode) {
                 return res.status(404).send({ message: 'Code not found' });
             }
 
-            if (appTokenCode.createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
+            if (loginCode.createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
                 console.log('Token outdated -> delete');
-                appTokenCode.remove(() => res.status(404).send({ message: 'Code not found' }));
+                loginCode.remove(() => res.status(404).send({ message: 'Code not found' }));
                 return;
             }
 
-            const token = generateApplicationUserToken(res.locals.user, appTokenCode.application)
+            const token = generateApplicationUserToken(loginCode.user, loginCode.application);
 
-            appTokenCode.remove(() => {
+            loginCode.remove(() => {
                 return res.header('authorization', token).send({ token: token });
             });
         });

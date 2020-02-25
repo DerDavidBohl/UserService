@@ -52,30 +52,6 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// export function authenticateWithApplicationUserToken(req: Request, res: Response, next: NextFunction) {
-
-//   try {
-//     const token = <string>req.headers.authorization;
-//     const payload: ApplicationJsonWebTokenPayload =
-//       <ApplicationJsonWebTokenPayload>(<JsonWebToken>jsonwebtoken.verify(token, process.env.JWT_SECRET || 'Unsecure Secret!!!!')).payload;
-
-//     User.findById(payload.user.id, (err, application) => {
-//       if (err || !application)
-//         return res.status(401).send({ message: 'InvalidToken' });
-
-//       User.findById(payload.application.id, (err, user) => {
-//         if (err || !user || !user.roles.includes(UserServiceRole.Application))
-//           return res.status(401).send({ message: 'InvalidToken' });
-
-//         res.locals.application = application;
-//         res.locals.user = user;
-//       });
-//     });
-//   } catch (error) {
-//     return res.status(401).send({ message: 'InvalidToken' });
-//   }
-// }
-
 export function generateUserToken(caller: IUserDocument, expiresIn: string | undefined = '1d') {
   const options: SignOptions | undefined = expiresIn ? {
     expiresIn: expiresIn
@@ -88,7 +64,7 @@ export function generateUserToken(caller: IUserDocument, expiresIn: string | und
     process.env.JWT_SECRET || 'Unsecure Secret!!!!', options);
 }
 
-export function generateApplicationUserToken(user: IUserDocument, application: IUserDocument, expiresIn: string = "1d") {
+export function generateApplicationUserToken(user: IUserDocument, application: IUserDocument, expiresIn: string | undefined = "1d") {
 
   const options: SignOptions | undefined = expiresIn ? {
     expiresIn: expiresIn

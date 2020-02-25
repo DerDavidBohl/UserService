@@ -14,12 +14,12 @@ info:
     url: http://opensource.org/licenses/MIT
 paths:
   /authorize/code:
-    get:
+    post:
       parameters:
-        - $ref: '#/parameters/redirectUriInQuery'
+        - $ref: '#/parameters/application_id'
       responses:
-        '301':
-          description: Redirect to RiderectUri
+        '201':
+          description: Code generated
   /authorize/token:
     get:
       parameters:
@@ -153,17 +153,17 @@ paths:
         '204':
           description: OK
 parameters:
+  application_id:
+    name: application_id
+    in: body
+    description: User ID of the application
+    schema:
+      $ref: '#/definitions/application_id'
   tokenCodeInQuery:
     name: code
     in: query
     type: string
     description: code for Token authorization
-  redirectUriInQuery:
-    name: redirect
-    in: query
-    type: string
-    description: Redirect Uri in Query
-    default: ./dummy
   resetTokenInQuery:
     name: token
     in: query
@@ -230,6 +230,11 @@ parameters:
     in: query
     type: string
 definitions:
+  application_id:
+    type: object
+    properties:
+      application_id:
+        type: string
   User:
     type: object
     properties:
