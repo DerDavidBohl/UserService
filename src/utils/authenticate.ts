@@ -16,7 +16,6 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   //Try to validate the token and get data
   try {
     jwtPayload = (<JsonWebToken>jsonwebtoken.verify(token, process.env.JWT_SECRET)).payload;
-    console.log(`payload: ${JSON.stringify(jwtPayload)}`);
 
     User.findById(jwtPayload.user.id, (err, user) => {
       if (err || !user || user.passwordLastModified.toString() !== jwtPayload.user.passwordLastModified) {
@@ -58,7 +57,6 @@ export function generateUserToken(caller: IUserDocument, expiresIn: string | und
   } : undefined;
 
   const payload = new UserJsonWebTokenPayload(new UserResponse(caller))
-  console.log(payload);
 
   return sign({ payload },
     process.env.JWT_SECRET || 'Unsecure Secret!!!!', options);

@@ -6,7 +6,7 @@ export class ContextValidation {
      }
 
     allowed(req: Request, res: Response, next: NextFunction) {
-        console.log(this);
+        
         if (res.locals.authType !== this.context) {
             return res.status(401).send({ message: 'You must be logged in User Context only' });
         }

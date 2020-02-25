@@ -69,9 +69,6 @@ export class ResetController implements RestController {
             user.passwordResetToken = randomBytes(32).toString('hex');
             user.passwordResetTokenRequestDate = new Date();
 
-            console.log(process.env.MAIL_DISPLAY_NAME);
-
-
             user.save((err, user) => {
                 mailer.sendMail({
                     subject: 'Password Reset',
