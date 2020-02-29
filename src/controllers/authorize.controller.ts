@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { authenticate, generateApplicationUserToken as generateApplicationUserToken } from "../utils/authenticate";
 import { query, body } from "express-validator";
 import { validateParameters } from "../utils/validate";
-import { LoginCode, ILoginCode } from "../models/app.token.code.model";
+import { LoginCode, ILoginCode } from "../models/login.code.model";
 import { User } from "../models/user.model";
 import { UserServiceRole } from "../utils/roles";
 

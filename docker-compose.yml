@@ -1,7 +1,7 @@
 version: '3'
 services: 
   api:
-    image: davidbohl/user-service
+    image: davidbohl/user-service-api
     restart: always
     build: .
     command: npm run dev
