@@ -13,7 +13,7 @@ export class RestApp {
 
     constructor(private port: number, controllers: RestController[], apiRoute: string = '/api/v1', defauleSubRoute: string | undefined) {
         
-        this.app.use(cors({origin: '*', exposedHeaders: ['authorization', 'Cache-Control']}));
+        this.app.use(cors({origin: '*', exposedHeaders: ['authorization', 'Cache-Control', 'location']}));
         this.app.use(express.json());
         this.app.use(apiRoute + '/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
