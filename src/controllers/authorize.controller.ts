@@ -4,7 +4,7 @@ import { authenticate, generateApplicationUserToken as generateApplicationUserTo
 import { query, body } from "express-validator";
 import { validateParameters } from "../utils/validate";
 import { LoginCode, ILoginCode } from "../models/login.code.model";
-import { User } from "../models/user.model";
+import { User, TokenType } from "../models/user.model";
 import { UserServiceRole } from "../utils/roles";
 
 export class AuthorizeController implements RestController {
@@ -25,6 +25,9 @@ export class AuthorizeController implements RestController {
 
     generateCode(req: Request, res: Response): any {
         if (!validateParameters(req, res)) return;
+
+        if(res.locals.authType !== TokenType.Application)
+            return res.status(403).send()
 
         const now = new Date();
 

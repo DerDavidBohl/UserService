@@ -31,8 +31,8 @@ export class UserController implements RestController {
         router.put('/current/password', authenticate, onlyContext(TokenType.User).allowed, body('password').isLength({ min: 8 }).matches(passwordRegEx), this.updateCurrentUserPassword);
         router.get('/current/roles', authenticate,  this.getCurrentUserRoles);
 
-        router.get('/:userId', authenticate, role(UserServiceRole.User).needed, param('userId').exists(), this.getSpecificUser);
-        router.get('/:userId', authenticate, role(UserServiceRole.Write).needed, param('userId').exists(), this.deleteSpecificUser)
+        router.get('/:userId', authenticate, param('userId').exists(), this.getSpecificUser);
+        router.delete('/:userId', authenticate, role(UserServiceRole.Write).needed, param('userId').exists(), this.deleteSpecificUser)
 
         router.get('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), this.userContextGetSpecificUserRoles);
         router.post('/:userId/roles', authenticate, role(UserServiceRole.Application).needed, param('userId').exists(), body().isArray(), this.userContextAddRoleToSpecificUser);
@@ -169,8 +169,13 @@ export class UserController implements RestController {
 
     getSpecificUser(req: Request, res: Response): any {
         User.findById(req.params.userId, (err, user) => {
+       
+            console.log((<IUserDocument>res.locals.user).roles);
+            
             if (err || !user || 
-                (!(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Read) && !user.roles.includes(UserServiceRole.Application))
+                (!(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Read) && 
+                !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Application) && 
+                !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Root))
                 /* Users are allowed to read Applications and Readers are allowed to read all users */) {
                 return res.sendStatus(404)
             }
