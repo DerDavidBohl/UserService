@@ -45,7 +45,7 @@ export function addRoleToUser(callingUser: IUser, targetUserId: string, roles: s
         });
 
         user.save((err, result) => {
-            return res.sendStatus(201);
+            return res.status(201).send({message: 'created'});
         });
     });
 }

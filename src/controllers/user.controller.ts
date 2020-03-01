@@ -169,9 +169,7 @@ export class UserController implements RestController {
 
     getSpecificUser(req: Request, res: Response): any {
         User.findById(req.params.userId, (err, user) => {
-       
-            console.log((<IUserDocument>res.locals.user).roles);
-            
+                  
             if (err || !user || 
                 (!(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Read) && 
                 !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Application) && 
