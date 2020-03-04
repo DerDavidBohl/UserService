@@ -26,7 +26,7 @@ export class AuthorizeController implements RestController {
     generateCode(req: Request, res: Response): any {
         if (!validateParameters(req, res)) return;
 
-        if(res.locals.authType !== TokenType.Application)
+        if(res.locals.authType !== TokenType.User)
             return res.status(403).send()
 
         const now = new Date();
