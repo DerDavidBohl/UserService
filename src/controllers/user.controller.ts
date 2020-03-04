@@ -170,13 +170,24 @@ export class UserController implements RestController {
     getSpecificUser(req: Request, res: Response): any {
         User.findById(req.params.userId, (err, user) => {
                   
-            if (err || !user || 
-                (!(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Read) && 
-                !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Application) && 
-                !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Root))
+            if (err || !user 
                 /* Users are allowed to read Applications and Readers are allowed to read all users */) {
-                return res.sendStatus(404)
+                return res.sendStatus(404);
             }
+
+            if(user.roles.includes(UserServiceRole.Application)) {
+                const userResponse = new UserResponse(user);
+                userResponse.email = '';
+                userResponse.passwordLastModified = '';
+                return res.status(200).send(userResponse);
+            }
+
+            if(!(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Read) &&
+            !(<IUserDocument>res.locals.user).roles.includes(UserServiceRole.Root)) {
+                return res.sendStatus(404);
+            }
+
+            
 
             res.status(200).send(new UserResponse(user));
         });
