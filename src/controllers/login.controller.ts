@@ -1,8 +1,8 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
 import { check } from "express-validator";
-import { User, IUserDocument, UserResponse, UserJsonWebTokenPayload } from "../models/user.model";
-import { compare, compareSync } from "bcryptjs";
+import { User, IUserDocument } from "../models/user.model";
+import { compareSync } from "bcryptjs";
 import { generateUserToken } from "../utils/authenticate";
 
 export class LoginController implements RestController {

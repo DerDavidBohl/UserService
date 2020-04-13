@@ -4,8 +4,9 @@ import { authenticate, generateApplicationUserToken as generateApplicationUserTo
 import { query, body } from "express-validator";
 import { validateParameters } from "../utils/validate";
 import { LoginCode, ILoginCode } from "../models/login.code.model";
-import { User, TokenType } from "../models/user.model";
+import { User } from "../models/user.model";
 import { UserServiceRole } from "../utils/roles";
+import { TokenType } from "../models/tokens";
 
 export class AuthorizeController implements RestController {
     path: string = '/authorize';
@@ -26,22 +27,22 @@ export class AuthorizeController implements RestController {
     generateCode(req: Request, res: Response): any {
         if (!validateParameters(req, res)) return;
 
-        if(res.locals.authType !== TokenType.User)
+        if (res.locals.authType !== TokenType.User)
             return res.status(403).send()
 
         const now = new Date();
 
         User.findById(req.body.application_id, (err, application) => {
-            if(err || !application || !application.roles.includes(UserServiceRole.Application)) {
-                return res.status(404).send({message: `Could not find Application ID ${req.query.application_id}`});
+            if (err || !application || !application.roles.includes(UserServiceRole.Application)) {
+                return res.status(404).send({ message: `Could not find Application ID ${req.query.application_id}` });
             }
 
             LoginCode.create([<ILoginCode>{ user: res.locals.user, application: application }], (err, created) => {
                 if (!created || err || created.length != 1 || created[0].createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
                     return res.status(500).send({ message: 'Code generation failed' });
                 }
-    
-                res.send({code: created[0].code});
+
+                res.send({ code: created[0].code });
             });
         });
     }
@@ -57,7 +58,10 @@ export class AuthorizeController implements RestController {
                 return res.status(404).send({ message: 'Code not found' });
             }
 
-            if (loginCode.createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf()) {
+            if (loginCode.createdAt.valueOf() < now.setSeconds(now.getSeconds() - 10).valueOf() ||
+                !loginCode.application._id ||
+                loginCode.application._id != res.locals.application._id) {
+
                 console.log('Token outdated -> delete');
                 loginCode.remove(() => res.status(404).send({ message: 'Code not found' }));
                 return;

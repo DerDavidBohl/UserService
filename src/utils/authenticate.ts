@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jsonwebtoken, { sign, SignOptions } from "jsonwebtoken";
-import { UserJsonWebTokenPayload, User, IUserDocument, UserResponse, ApplicationJsonWebTokenPayload, JsonWebToken, TokenType, IJsonWebToken } from "../models/user.model";
-import { UserServiceRole } from "./roles";
+import { User, IUserDocument, UserResponse } from "../models/user.model";
+import { IJsonWebToken, JsonWebToken, TokenType, ApplicationJsonWebTokenPayload, UserJsonWebTokenPayload } from "../models/tokens";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
 

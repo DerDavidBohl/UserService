@@ -1,6 +1,6 @@
 import { RestController } from "../interfaces/rest-controller.interface";
 import { Router, Request, Response } from "express";
-import { User, IUser, UserResponse, IUserDocument, TokenType } from "../models/user.model";
+import { User, IUser, UserResponse, IUserDocument } from "../models/user.model";
 import { check, validationResult, query, param, body } from "express-validator";
 import { hashSync } from "bcryptjs";
 import { passwordRegEx } from "../utils/password-regex";
@@ -10,6 +10,7 @@ import { authenticate, generateUserToken } from "../utils/authenticate";
 import { UserServiceRole, role } from "../utils/roles";
 import { deleteRoleFromUser, addRoleToUser, getRolesForUser } from "../utils/user.management";
 import { onlyContext } from "../utils/ContextValidation";
+import { TokenType } from "../models/tokens";
 
 export class UserController implements RestController {
     path: string = '/users';

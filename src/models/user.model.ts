@@ -3,6 +3,7 @@ import { sign } from "jsonwebtoken";
 import { passwordRegEx } from "../utils/password-regex";
 import { randomBytes } from "crypto";
 import { Token } from "nodemailer/lib/xoauth2";
+import { IJsonWebToken } from "./tokens";
 
 const userSchema = new Schema({
     name: {
@@ -79,29 +80,4 @@ export interface IUser {
 }
 
 export interface IUserDocument extends IUser, Document {}
-
-export interface IJsonWebToken {
-    user: UserResponse;
-    type: TokenType;
-}
-
-export interface JsonWebToken {
-    payload: any;
-}
-
-export class UserJsonWebTokenPayload implements IJsonWebToken {
-    type = TokenType.User;
-    constructor(public user: UserResponse){}
-}
-
-export class ApplicationJsonWebTokenPayload implements IJsonWebToken {
-    type = TokenType.Application;
-    constructor(public user: UserResponse, public application: UserResponse){};
-}
-
 export const User = model<IUserDocument>("User", userSchema);
-
-export enum TokenType {
-    User,
-    Application
-}
