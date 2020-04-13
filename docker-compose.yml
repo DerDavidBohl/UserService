@@ -8,17 +8,17 @@ services:
     ports: 
       - "5000:3000"
     links: 
-      - user-service-mongo
+      - mongo
     depends_on: 
-      - user-service-mongo 
+      - mongo 
     volumes: 
       - .:/home/node/app
     env_file: environment_api.env
-  user-service-mongo:
-    container_name: user-service-mongo
+  mongo:
+    container_name: mongo
     image: mongo
     ports:
-      - "27117:27017"
+      - "27217:27017"
     volumes:
       - /userservice/data:/data/db
     env_file: environment_mongo.env

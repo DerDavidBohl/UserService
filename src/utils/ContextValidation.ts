@@ -1,5 +1,6 @@
-import { TokenType } from "../models/user.model";
+
 import { NextFunction, Request, Response } from "express";
+import { TokenType } from "../models/tokens";
 export class ContextValidation {
     constructor(private context: TokenType) {
         this.allowed = this.allowed.bind(this);
